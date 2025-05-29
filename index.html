@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,18 +16,26 @@
   <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <img src="nowe.com.ua logo robi.png" alt="Логотип" class="top-left-logo">
-  <h1>Завантажте зображення</h1>
-  <input type="file" accept="image/*" id="imageInput">
-  <br>
-  <button id="togglePaddingBtn">🔲 Вимкнути відступи</button>
-  <br>
-  <canvas id="canvas" width="1200" height="1200"></canvas>
-  <br>
-  <button id="downloadBtn" style="display:none;">Скачати 1200x1200</button>
+  <h1>Масове масштабування зображень</h1>
 
+  <input type="file" id="imageInput" multiple accept="image/*"><br>
+
+  <label for="codePrefix">Префікс назви:</label>
+  <input type="text" id="codePrefix" placeholder="код_1"><br>
+
+  <button id="togglePaddingBtn">Вимкнути відступи (для всіх)</button>
+  <button id="processBtn">🖼️ Обробити та скачати ZIP</button>
+
+  <div class="preview-container" id="previewContainer"></div>
+
+  <canvas id="canvas" width="1200" height="1200"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
+
 </html>

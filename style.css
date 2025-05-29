@@ -8,7 +8,6 @@ body {
   text-align: center;
   position: relative;
 }
-
 .top-left-logo {
   position: absolute;
   top: 20px;
@@ -16,21 +15,48 @@ body {
   width: 180px;
   z-index: 10;
 }
-
-input {
+input[type="text"] {
+  padding: 8px;
+  font-size: 16px;
+  width: 300px;
   margin-bottom: 20px;
 }
+input,
+button {
+  margin: 10px;
+}
 canvas {
-  border: 1px solid #ccc;
-  margin-top: 20px;
-  background: white;
-  width: 400px;
-  height: auto; 
+  display: none;
 }
 
 button {
   padding: 10px 20px;
   margin-top: 20px;
   font-size: 16px;
+  cursor: pointer;
+}
+
+.preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+.preview {
+  position: relative;
+}
+.preview canvas {
+  display: block;
+  border: 1px solid #ccc;
+}
+.toggle-individual {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  font-size: 12px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #999;
   cursor: pointer;
 }
