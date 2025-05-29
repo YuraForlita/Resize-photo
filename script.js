@@ -1,42 +1,55 @@
 const imageInput = document.getElementById("imageInput");
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const downloadBtn = document.getElementById("downloadBtn");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const togglePaddingBtn = document.getElementById("togglePaddingBtn");
 
-imageInput.addEventListener("change", (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+    let withPadding = true; // Режим з відступами (включено за замовчуванням)
 
-  const img = new Image();
-  img.onload = () => {
-    // Очистити полотно
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    togglePaddingBtn.addEventListener("click", () => {
+      withPadding = !withPadding;
+      togglePaddingBtn.textContent = withPadding
+        ? "🔲 Вимкнути відступи"
+        : "✅ Увімкнути відступи";
+      
+      // Якщо вже завантажено зображення — перемалювати
+      if (imageInput.files[0]) {
+        processImage(imageInput.files[0]);
+      }
+    });
 
-    // Білий фон
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    imageInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        processImage(file);
+      }
+    });
 
-    // Обчислити масштаб до 1000x1000
-    const maxSize = 1000;
-    let scale = Math.min(maxSize / img.width, maxSize / img.height);
-    const newWidth = img.width * scale;
-    const newHeight = img.height * scale;
+    function processImage(file) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Обчислити координати для центрування
-    const x = (canvas.width - newWidth) / 2;
-    const y = (canvas.height - newHeight) / 2;
+        const padding = withPadding ? 50 : 0;
+        const maxSize = 1200 - 2 * padding;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
 
-    // Намалювати зображення
-    ctx.drawImage(img, x, y, newWidth, newHeight);
+        const newWidth = img.width * scale;
+        const newHeight = img.height * scale;
+        const x = (canvas.width - newWidth) / 2;
+        const y = (canvas.height - newHeight) / 2;
 
-    downloadBtn.style.display = "inline-block";
-  };
-  img.src = URL.createObjectURL(file);
-});
+        ctx.drawImage(img, x, y, newWidth, newHeight);
+        downloadBtn.style.display = "inline-block";
+      };
+      img.src = URL.createObjectURL(file);
+    }
 
-downloadBtn.addEventListener("click", () => {
-  const link = document.createElement("a");
-  link.download = "image_1200x1200.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-});
+    downloadBtn.addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "image_1200x1200.jpg";
+      link.href = canvas.toDataURL("image/jpeg", 1.0);
+      link.click();
+    });
