@@ -1,0 +1,33 @@
+body {
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    position: relative;
+    }
+    
+    .top-left-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 180px;
+    z-index: 10;
+  }
+
+    input {
+      margin-bottom: 20px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-top: 20px;
+      background: white;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      cursor: pointer;
+
