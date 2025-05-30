@@ -9,6 +9,7 @@ const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
 const saveCropBtn = document.getElementById("saveCropBtn");
 
+
 let cropper;
 let currentCropObj = null;
 let withPadding = true;
@@ -28,8 +29,13 @@ togglePaddingBtn.addEventListener("click", () => {
 imageInput.addEventListener("change", () => {
   previewContainer.innerHTML = "";
   previewImages = [];
-  Array.from(imageInput.files).forEach((file, index) => {
-    const obj = { file, individualPadding: withPadding };
+  Array.from(imageInput.files).forEach((file) => {
+    const obj = {
+      file,
+      individualPadding: withPadding,
+      removeBgBlob: null,
+      croppedBlob: null,
+    };
     previewImages.push(obj);
     createPreview(obj);
   });
@@ -53,13 +59,23 @@ function createPreview(obj) {
     updatePreview(obj);
   });
   wrapper.appendChild(toggleBtn);
+
   const cropBtn = document.createElement("button");
-cropBtn.className = "toggle-individual";
-cropBtn.style.left = "auto";
-cropBtn.style.right = "5px";
-cropBtn.textContent = "✏️";
-cropBtn.addEventListener("click", () => openCropModal(obj));
-wrapper.appendChild(cropBtn);
+  cropBtn.className = "toggle-individual";
+  cropBtn.style.left = "auto";
+  cropBtn.style.right = "35px";
+  cropBtn.textContent = "✏️";
+  cropBtn.addEventListener("click", () => openCropModal(obj));
+  wrapper.appendChild(cropBtn);
+
+  const removeBgBtn = document.createElement("button");
+  removeBgBtn.className = "toggle-individual";
+  removeBgBtn.style.left = "auto";
+  removeBgBtn.style.right = "5px";
+  removeBgBtn.textContent = "🧽";
+  removeBgBtn.addEventListener("click", () => handleRemoveBackground(obj, removeBgBtn));
+  wrapper.appendChild(removeBgBtn);
+
   previewContainer.appendChild(wrapper);
   previewContainer.style.display = "flex";
 
@@ -87,9 +103,74 @@ function updatePreview(obj) {
 
     previewCtx.drawImage(img, x, y, newWidth, newHeight);
   };
-  img.src = URL.createObjectURL(obj.file);
+  const source = obj.removeBgBlob || obj.croppedBlob || obj.file;
+  img.src = URL.createObjectURL(source);
 }
 
+function handleRemoveBackground(obj, button) {
+  button.disabled = true;
+  button.textContent = "⏳";
+  const formData = new FormData();
+  formData.append("image_file", obj.croppedBlob || obj.file);
+  formData.append("size", "auto");
+
+  fetch("https://api.remove.bg/v1.0/removebg", {
+    method: "POST",
+    headers: {
+      "X-Api-Key": "XqDCHZChV2MxuyvdxgyNMr7P",
+    },
+    body: formData,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Помилка remove.bg");
+      return res.blob();
+    })
+    .then((blob) => {
+      obj.removeBgBlob = blob;
+      updatePreview(obj);
+      button.textContent = "✅";
+    })
+    .catch((err) => {
+      console.error("remove.bg error:", err);
+      button.textContent = "⚠️";
+    })
+    .finally(() => {
+      button.disabled = false;
+    });
+}
+
+function openCropModal(obj) {
+  currentCropObj = obj;
+  const source = obj.removeBgBlob || obj.file;
+  const reader = new FileReader();
+  reader.onload = () => {
+    cropImage.src = reader.result;
+    cropModal.style.display = "flex";
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(cropImage, {
+      viewMode: 1,
+      autoCropArea: 1,
+    });
+  };
+  reader.readAsDataURL(source);
+}
+
+function closeCropModal() {
+  if (cropper) cropper.destroy();
+  cropper = null;
+  cropModal.style.display = "none";
+}
+
+saveCropBtn.addEventListener("click", () => {
+  if (!cropper || !currentCropObj) return;
+
+  cropper.getCroppedCanvas().toBlob((blob) => {
+    currentCropObj.croppedBlob = blob;
+    updatePreview(currentCropObj);
+    closeCropModal();
+  }, "image/png", 1.0);
+});
 function processImage(file, padding, callback) {
   const img = new Image();
   img.onload = () => {
@@ -108,58 +189,8 @@ function processImage(file, padding, callback) {
     ctx.drawImage(img, x, y, newWidth, newHeight);
     canvas.toBlob(callback, "image/jpeg", 1.0);
   };
-  img.src = URL.createObjectURL(file instanceof Blob ? file : file);
+  img.src = URL.createObjectURL(file);
 }
-function openCropModal(obj) {
-  currentCropObj = obj;
-  const reader = new FileReader();
-  reader.onload = () => {
-    cropImage.src = reader.result;
-    cropModal.style.display = "flex";
-
-    if (cropper) cropper.destroy();
-    cropper = new Cropper(cropImage, {
-      viewMode: 1,
-      autoCropArea: 1,
-    });
-  };
-  reader.readAsDataURL(obj.file);
-}
-
-function closeCropModal() {
-  if (cropper) cropper.destroy();
-  cropper = null;
-  cropModal.style.display = "none";
-}
-
-saveCropBtn.addEventListener("click", () => {
-  if (!cropper || !currentCropObj) return;
-
-  cropper.getCroppedCanvas().toBlob((blob) => {
-    currentCropObj.croppedBlob = blob;
-
-    // Для прев’ю оновлюємо
-    const img = new Image();
-    img.onload = () => {
-      const ctx = currentCropObj.previewCtx;
-      ctx.clearRect(0, 0, 200, 200);
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, 200, 200);
-
-      const padding = currentCropObj.individualPadding ? 10 : 0;
-      const maxSize = 200 - 2 * padding;
-      const scale = Math.min(maxSize / img.width, maxSize / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      const x = (200 - w) / 2;
-      const y = (200 - h) / 2;
-      ctx.drawImage(img, x, y, w, h);
-    };
-    img.src = URL.createObjectURL(blob);
-
-    closeCropModal();
-  }, "image/jpeg", 1.0);
-});
 
 processBtn.addEventListener("click", async () => {
   if (!previewImages.length) return;
@@ -168,15 +199,15 @@ processBtn.addEventListener("click", async () => {
   const prefix = codeInput.value.trim() || "image";
 
   for (let i = 0; i < previewImages.length; i++) {
-    const { file, croppedBlob, individualPadding } = previewImages[i];
-const sourceFile = croppedBlob || file;
+    const { file, croppedBlob, removeBgBlob, individualPadding } = previewImages[i];
+    const sourceFile = removeBgBlob || croppedBlob || file;
 
-await new Promise((resolve) => {
-  processImage(sourceFile, individualPadding ? 50 : 0, (blob) => {
-    zip.file(`${prefix}_${i + 1}.jpg`, blob);
-    resolve();
-  });
-});
+    await new Promise((resolve) => {
+      processImage(sourceFile, individualPadding ? 50 : 0, (blob) => {
+        zip.file(`${prefix}_${i + 1}.jpg`, blob);
+        resolve();
+      });
+    });
   }
 
   zip.generateAsync({ type: "blob" }).then((content) => {
