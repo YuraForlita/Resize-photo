@@ -108,10 +108,19 @@ function updatePreview(obj) {
 }
 
 function handleRemoveBackground(obj, button) {
+  const userPin = prompt("Введіть PIN-код (4 цифри):");
+
+  if (userPin === null || userPin.trim() !== "1456") {
+    alert("Невірний PIN-код або операцію скасовано.");
+    return;
+  }
+
   button.disabled = true;
   button.textContent = "⏳";
+
+  const source = obj.croppedBlob || obj.file;
   const formData = new FormData();
-  formData.append("image_file", obj.croppedBlob || obj.file);
+  formData.append("image_file", source);
   formData.append("size", "auto");
 
   fetch("https://api.remove.bg/v1.0/removebg", {
