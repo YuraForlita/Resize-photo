@@ -5,7 +5,12 @@ const togglePaddingBtn = document.getElementById("togglePaddingBtn");
 const processBtn = document.getElementById("processBtn");
 const codeInput = document.getElementById("codeInput");
 const previewContainer = document.getElementById("previewContainer");
+const cropModal = document.getElementById("cropModal");
+const cropImage = document.getElementById("cropImage");
+const saveCropBtn = document.getElementById("saveCropBtn");
 
+let cropper;
+let currentCropObj = null;
 let withPadding = true;
 let previewImages = [];
 
@@ -48,7 +53,13 @@ function createPreview(obj) {
     updatePreview(obj);
   });
   wrapper.appendChild(toggleBtn);
-
+  const cropBtn = document.createElement("button");
+cropBtn.className = "toggle-individual";
+cropBtn.style.left = "auto";
+cropBtn.style.right = "5px";
+cropBtn.textContent = "✏️";
+cropBtn.addEventListener("click", () => openCropModal(obj));
+wrapper.appendChild(cropBtn);
   previewContainer.appendChild(wrapper);
   previewContainer.style.display = "flex";
 
@@ -97,8 +108,58 @@ function processImage(file, padding, callback) {
     ctx.drawImage(img, x, y, newWidth, newHeight);
     canvas.toBlob(callback, "image/jpeg", 1.0);
   };
-  img.src = URL.createObjectURL(file);
+  img.src = URL.createObjectURL(file instanceof Blob ? file : file);
 }
+function openCropModal(obj) {
+  currentCropObj = obj;
+  const reader = new FileReader();
+  reader.onload = () => {
+    cropImage.src = reader.result;
+    cropModal.style.display = "flex";
+
+    if (cropper) cropper.destroy();
+    cropper = new Cropper(cropImage, {
+      viewMode: 1,
+      autoCropArea: 1,
+    });
+  };
+  reader.readAsDataURL(obj.file);
+}
+
+function closeCropModal() {
+  if (cropper) cropper.destroy();
+  cropper = null;
+  cropModal.style.display = "none";
+}
+
+saveCropBtn.addEventListener("click", () => {
+  if (!cropper || !currentCropObj) return;
+
+  cropper.getCroppedCanvas().toBlob((blob) => {
+    currentCropObj.croppedBlob = blob;
+
+    // Для прев’ю оновлюємо
+    const img = new Image();
+    img.onload = () => {
+      const ctx = currentCropObj.previewCtx;
+      ctx.clearRect(0, 0, 200, 200);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, 200, 200);
+
+      const padding = currentCropObj.individualPadding ? 10 : 0;
+      const maxSize = 200 - 2 * padding;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height);
+      const w = img.width * scale;
+      const h = img.height * scale;
+      const x = (200 - w) / 2;
+      const y = (200 - h) / 2;
+      ctx.drawImage(img, x, y, w, h);
+    };
+    img.src = URL.createObjectURL(blob);
+
+    closeCropModal();
+  }, "image/jpeg", 1.0);
+});
 
 processBtn.addEventListener("click", async () => {
   if (!previewImages.length) return;
@@ -107,13 +168,15 @@ processBtn.addEventListener("click", async () => {
   const prefix = codeInput.value.trim() || "image";
 
   for (let i = 0; i < previewImages.length; i++) {
-    const { file, individualPadding } = previewImages[i];
-    await new Promise((resolve) => {
-      processImage(file, individualPadding ? 50 : 0, (blob) => {
-        zip.file(`${prefix}_${i + 1}.jpg`, blob);
-        resolve();
-      });
-    });
+    const { file, croppedBlob, individualPadding } = previewImages[i];
+const sourceFile = croppedBlob || file;
+
+await new Promise((resolve) => {
+  processImage(sourceFile, individualPadding ? 50 : 0, (blob) => {
+    zip.file(`${prefix}_${i + 1}.jpg`, blob);
+    resolve();
+  });
+});
   }
 
   zip.generateAsync({ type: "blob" }).then((content) => {

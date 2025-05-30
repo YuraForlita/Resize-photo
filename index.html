@@ -13,11 +13,12 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <img src="nowe.com.ua logo robi.png" alt="Логотип" class="top-left-logo">
+  <img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
   <h1>Масове масштабування зображень</h1>
 
   <input type="file" id="imageInput" multiple accept="image/*"><br>
@@ -26,12 +27,21 @@
   <input type="text" id="codeInput" placeholder="код_1"><br>
 
   <button id="togglePaddingBtn">Вимкнути відступи (для всіх)</button>
-  <button id="processBtn">🖼️ Обробити та скачати ZIP</button>
+  <button id="processBtn">Обробити та скачати ZIP</button>
   
   <div class="preview-container" id="previewContainer"></div>
 
   <canvas id="canvas" width="1200" height="1200"></canvas>
-
+  <div id="cropModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:1000;">
+  <div style="background:white; padding:20px; position:relative;">
+    <img id="cropImage" style="max-width:80vw; max-height:80vh;" />
+    <div style="margin-top:10px; text-align:right;">
+      <button id="saveCropBtn">Зберегти</button>
+      <button onclick="closeCropModal()">Скасувати</button>
+    </div>
+  </div>
+</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
