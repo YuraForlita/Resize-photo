@@ -9,7 +9,6 @@ const cropModal = document.getElementById("cropModal");
 const cropImage = document.getElementById("cropImage");
 const saveCropBtn = document.getElementById("saveCropBtn");
 
-
 let cropper;
 let currentCropObj = null;
 let withPadding = true;
@@ -27,7 +26,6 @@ togglePaddingBtn.addEventListener("click", () => {
 });
 
 imageInput.addEventListener("change", () => {
-  previewContainer.innerHTML = "";
   previewImages = [];
   Array.from(imageInput.files).forEach((file) => {
     const obj = {
@@ -37,13 +35,49 @@ imageInput.addEventListener("change", () => {
       croppedBlob: null,
     };
     previewImages.push(obj);
-    createPreview(obj);
   });
+  renderPreviews();
 });
+
+function renderPreviews() {
+  previewContainer.innerHTML = "";
+  previewImages.forEach((obj) => createPreview(obj));
+}
 
 function createPreview(obj) {
   const wrapper = document.createElement("div");
   wrapper.className = "preview";
+  wrapper.draggable = true;
+  wrapper.dataset.index = previewImages.indexOf(obj);
+
+  wrapper.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", wrapper.dataset.index);
+    wrapper.style.opacity = "0.5";
+  });
+  wrapper.addEventListener("dragend", () => {
+    wrapper.style.opacity = "1";
+  });
+  wrapper.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    wrapper.style.border = "2px dashed #666";
+  });
+  wrapper.addEventListener("dragleave", () => {
+    wrapper.style.border = "none";
+  });
+  wrapper.addEventListener("drop", (e) => {
+    e.preventDefault();
+    wrapper.style.border = "none";
+
+    const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    const toIndex = parseInt(wrapper.dataset.index);
+
+    if (fromIndex === toIndex) return;
+
+    const moved = previewImages.splice(fromIndex, 1)[0];
+    previewImages.splice(toIndex, 0, moved);
+
+    renderPreviews();
+  });
 
   const canvasPreview = document.createElement("canvas");
   canvasPreview.width = 200;
@@ -180,6 +214,7 @@ saveCropBtn.addEventListener("click", () => {
     closeCropModal();
   }, "image/png", 1.0);
 });
+
 function processImage(file, padding, callback) {
   const img = new Image();
   img.onload = () => {
