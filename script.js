@@ -109,6 +109,23 @@ function createPreview(obj) {
   removeBgBtn.textContent = "🧽";
   removeBgBtn.addEventListener("click", () => handleRemoveBackground(obj, removeBgBtn));
   wrapper.appendChild(removeBgBtn);
+  
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "toggle-individual";
+  deleteBtn.style.left = "auto";
+  deleteBtn.style.right = "65px";
+  deleteBtn.textContent = "❌";
+  deleteBtn.addEventListener("click", () => {
+    const confirmed = confirm("Видалити це зображення?");
+    if (confirmed) {
+      const index = previewImages.indexOf(obj);
+      if (index !== -1) {
+        previewImages.splice(index, 1);
+        renderPreviews();
+      }
+    }
+  });
+  wrapper.appendChild(deleteBtn);
 
   previewContainer.appendChild(wrapper);
   previewContainer.style.display = "flex";
