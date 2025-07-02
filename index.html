@@ -17,28 +17,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
+<img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
   <h1>Масове масштабування зображень</h1>
 
   <input type="file" id="imageInput" multiple accept="image/*"><br>
 
   <label for="codeInput">Префікс назви:</label>
   <input type="text" id="codeInput" placeholder="код_1"><br>
-
-  <button id="togglePaddingBtn">Вимкнути відступи (для всіх)</button>
-  <button id="processBtn">Обробити та скачати ZIP</button>
-  
+<button id="togglePaddingBtn">Вимкнути відступи (для всіх)</button>
+<button id="processBtn">Обробити та Скачати ZIP</button>
   <div class="preview-container" id="previewContainer"></div>
 
-  <canvas id="canvas" width="1200" height="1200"></canvas>
-  <div id="cropModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:1000;">
-  <div style="background:white; padding:20px; position:relative;">
-    <img id="cropImage" style="max-width:80vw; max-height:80vh;" />
-    <div style="margin-top:10px; text-align:right;">
-      <button id="saveCropBtn">Зберегти</button>
-      <button onclick="closeCropModal()">Скасувати</button>
-    </div>
+<!-- Модальне вікно обрізання -->
+<div id="cropModal">
+  <img id="cropImage" src="" alt="Обрізання" />
+  <div style="margin-top:10px; text-align:right;">
+    <button id="saveCropBtn">Зберегти обрізку</button>
+    <button onclick="closeCropModal()">Скасувати</button>
+  </div>
+</div>
+
+<!-- Модальне вікно ручного центрування -->
+<div id="manualCenteringModal">
+  <canvas id="manualCenteringCanvas" width="400" height="400"></canvas>
+  <div style="margin-top:10px; text-align:right;">
+    <button id="manualCenteringSaveBtn">Зберегти</button>
+    <button id="manualCenteringCancelBtn">Скасувати</button>
   </div>
 </div>
 <div id="pinModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; justify-content:center; align-items:center; z-index:10000;">
@@ -51,8 +55,9 @@
     </div>
   </div>
 </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="script.js"></script>
 </body>
-</html>
+</html>  
