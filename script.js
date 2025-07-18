@@ -27,6 +27,7 @@ const clearPenBtn = document.getElementById("clearPenBtn");
 const savePenBtn = document.getElementById("savePenBtn");
 const cancelPenBtn = document.getElementById("cancelPenBtn");
 const undoPenBtn = document.getElementById("undoPenBtn");
+const clearAllBtn = document.getElementById("clearAllBtn");
 
 let cropper;
 let currentCropObj = null;
@@ -59,8 +60,8 @@ let initialPenImageHeight = 0;
 togglePaddingBtn.addEventListener("click", () => {
     withPadding = !withPadding;
     togglePaddingBtn.textContent = withPadding
-        ? "🔳 Вимкнути відступи (для всіх)"
-        : "✅ Увімкнути відступи (для всіх)";
+        ? "🔳 Вимкнути відступи"
+        : "✅ Увімкнути відступи";
     previewImages.forEach((obj) => {
         obj.individualPadding = withPadding;
         updatePreview(obj);
@@ -68,7 +69,6 @@ togglePaddingBtn.addEventListener("click", () => {
 });
 
 imageInput.addEventListener("change", () => {
-    previewImages = [];
     Array.from(imageInput.files).forEach((file) => {
         const obj = {
             file,
@@ -127,6 +127,15 @@ document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "z") {
         e.preventDefault();
         undoLastPenPoint();
+    }
+});
+
+clearAllBtn.addEventListener("click", () => {
+    if (confirm("Ви впевнені, що хочете видалити всі завантажені фото?")) {
+        previewImages = [];
+        renderPreviews();
+        imageInput.value = '';
+        currentPreviewedIndex = null;
     }
 });
 
