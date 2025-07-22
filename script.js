@@ -56,6 +56,11 @@ let dragStartX = 0;
 let dragStartY = 0;
 let initialPenImageWidth = 0;
 let initialPenImageHeight = 0;
+let isDraggingPoint = false;
+let draggedPointIndex = -1;
+const pointHitRadius = 15; 
+
+let hasDragged = false;  
 
 togglePaddingBtn.addEventListener("click", () => {
     withPadding = !withPadding;
@@ -627,66 +632,141 @@ function drawPenCanvas() {
     }
 }
 
-penCanvas.addEventListener("click", (e) => {
-    if (isClosed) return;
-
-    if (isDraggingPenCanvas) {
-        isDraggingPenCanvas = false;
-        return;
-    }
-
-    const rect = penCanvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const pointX = (mouseX - penOffsetX) / penScale;
-    const pointY = (mouseY - penOffsetY) / penScale;
-
-    if (drawingPoints.length > 0) {
-        const firstPoint = drawingPoints[0];
-        const dist = Math.sqrt(
-            Math.pow(pointX - firstPoint.x, 2) +
-            Math.pow(pointY - firstPoint.y, 2)
-        );
-        if (dist < 15 / penScale && drawingPoints.length >= 2) {
-            isClosed = true;
-        }
-    }
-    
-    drawingPoints.push({ x: pointX, y: pointY });
-    isDrawing = true;
-    drawPenCanvas();
-});
-
 penCanvas.addEventListener("mousemove", (e) => {
     const rect = penCanvas.getBoundingClientRect();
     lastMouseX = e.clientX - rect.left;
     lastMouseY = e.clientY - rect.top;
 
     if (isDraggingPenCanvas) {
+        hasDragged = true; 
         const dx = lastMouseX - dragStartX;
         const dy = lastMouseY - dragStartY;
         penOffsetX += dx;
         penOffsetY += dy;
         dragStartX = lastMouseX;
         dragStartY = lastMouseY;
+        drawPenCanvas();
+        return;
+    }
+
+    if (isDraggingPoint) {
+        hasDragged = true;
+        const pointX = (lastMouseX - penOffsetX) / penScale;
+        const pointY = (lastMouseY - penOffsetY) / penScale;
+
+        drawingPoints[draggedPointIndex].x = pointX;
+        drawingPoints[draggedPointIndex].y = pointY;
+        isClosed = false; 
+        drawPenCanvas();
+        return;
+    }
+
+
+    if (!isClosed) {
+        let overPoint = false;
+
+        const mouseXInImageCoords = (lastMouseX - penOffsetX) / penScale;
+        const mouseYInImageCoords = (lastMouseY - penOffsetY) / penScale;
+
+        for (let i = 0; i < drawingPoints.length; i++) {
+            const point = drawingPoints[i];
+            const dist = Math.sqrt(
+                Math.pow(mouseXInImageCoords - point.x, 2) +
+                Math.pow(mouseYInImageCoords - point.y, 2)
+            );
+
+            if (dist < pointHitRadius / penScale) { 
+                overPoint = true;
+                break;
+            }
+        }
+        penCanvas.style.cursor = overPoint ? "grab" : "crosshair";
+    } else {
+        penCanvas.style.cursor = "crosshair"; 
+    }
+
+    if (!isDraggingPoint && !isDraggingPenCanvas) {
+        drawPenCanvas();
+    }
+});
+
+penCanvas.addEventListener("mousedown", (e) => {
+    hasDragged = false;
+    const rect = penCanvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    if (e.button === 2) {
+        isDraggingPenCanvas = true;
+        dragStartX = mouseX;
+        dragStartY = mouseY;
+        penCanvas.style.cursor = "grabbing";
+        return;
+    }
+
+    else if (e.button === 0) {
+        const mouseXInImageCoords = (mouseX - penOffsetX) / penScale;
+        const mouseYInImageCoords = (mouseY - penOffsetY) / penScale;
+
+        for (let i = 0; i < drawingPoints.length; i++) {
+            const point = drawingPoints[i];
+            const dist = Math.sqrt(
+                Math.pow(mouseXInImageCoords - point.x, 2) +
+                Math.pow(mouseYInImageCoords - point.y, 2)
+            );
+
+            if (dist < pointHitRadius / penScale) {
+                isDraggingPoint = true;
+                draggedPointIndex = i;
+                penCanvas.style.cursor = "grabbing";
+                drawPenCanvas();
+                return;
+            }
+        }
     }
     drawPenCanvas();
 });
 
-penCanvas.addEventListener("mousedown", (e) => {
-    if (e.button === 2) {
-        isDraggingPenCanvas = true;
-        dragStartX = e.offsetX;
-        dragStartY = e.offsetY;
-        penCanvas.style.cursor = "grabbing";
-    }
-});
-
 penCanvas.addEventListener("mouseup", (e) => {
-    if (e.button === 2) {
-        isDraggingPenCanvas = false;
-        penCanvas.style.cursor = "crosshair";
+    const wasDraggingPoint = isDraggingPoint;
+    const wasDraggingPenCanvas = isDraggingPenCanvas;
+
+    isDraggingPoint = false;
+    draggedPointIndex = -1;
+    isDraggingPenCanvas = false;
+
+    penCanvas.style.cursor = "crosshair"; 
+  
+    if (e.button === 0 && !hasDragged) {
+        if (isClosed) {
+            drawPenCanvas();
+            return;
+        }
+
+        const rect = penCanvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const pointX = (mouseX - penOffsetX) / penScale;
+        const pointY = (mouseY - penOffsetY) / penScale;
+
+        if (drawingPoints.length > 0) {
+            const firstPoint = drawingPoints[0];
+            const dist = Math.sqrt(
+                Math.pow(pointX - firstPoint.x, 2) +
+                Math.pow(pointY - firstPoint.y, 2)
+            );
+
+            if (dist < pointHitRadius / penScale && drawingPoints.length >= 2) {
+                isClosed = true;
+            }
+        }
+   
+        drawingPoints.push({ x: pointX, y: pointY });
+        isDrawing = true;
     }
+
+    drawPenCanvas();
+
 });
 
 penCanvas.addEventListener("mouseleave", () => {
