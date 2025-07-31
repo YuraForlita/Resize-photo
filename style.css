@@ -1,343 +1,421 @@
 html {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
-*, *::before, *::after {
-    box-sizing: inherit;
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0d1b2a, #1b263b);
-    color: white;
-    font-family: 'Inter', Arial, sans-serif;
-    text-align: center;
-    position: relative;
-    padding-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1b2a, #1b263b);
+  color: white;
+  font-family: "Inter", Arial, sans-serif;
+  text-align: center;
+  position: relative;
+  padding-bottom: 50px;
 }
 
 .top-left-logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 180px;
-    z-index: 10;
-    border-radius: 8px;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 180px;
+  z-index: 10;
+  border-radius: 8px;
 }
 
 #canvas {
-    display: none;
+  display: none;
 }
 
 #previewContainer {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 20px;
-    padding: 10px;
-    max-width: 1200px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 10px;
+  max-width: 1200px;
 }
 .preview {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 .preview canvas {
-    display: block;
-    background: #fff;
-    border-radius: 8px;
+  display: block;
+  background: #fff;
+  border-radius: 8px;
 }
 .toggle-individual {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    padding: 0;
-    font-size: 16px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  padding: 0;
+  font-size: 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 2;
 }
 .toggle-individual:hover {
-    background: #f0f0f0;
-    border-color: #999;
+  background: #f0f0f0;
+  border-color: #999;
 }
 
-.preview .toggle-individual:nth-child(2) {
-    top: 5px;
-    right: 5px;
+.preview .delete-btn {
+  top: 5px;
+  right: 5px;
 }
-.preview .toggle-individual:nth-child(3) {
-    bottom: 5px;
-    left: 5px;
+.preview .padding-toggle-btn {
+  bottom: 5px;
+  left: 5px;
 }
-.preview .toggle-individual:nth-child(4) {
-    bottom: 5px;
-    right: 75px;
+.preview .crop-btn {
+  bottom: 5px;
+  right: 5px;
 }
-.preview .toggle-individual:nth-child(5) {
-    bottom: 5px;
-    right: 5px;
-}
-.preview .toggle-individual:nth-child(6) { 
-    bottom: 5px;
-    right: 40px;
+.preview .menu-btn {
+  top: 5px;
+  left: 5px;
+  font-size: 20px;
+  line-height: 26px;
 }
 
-
-#manualCenteringModal, #cropModal, #pinModal {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    z-index: 9999;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-    border-radius: 12px;
-    color: #333;
-    max-width: 90vw; 
-    max-height: 90vh;
-    overflow: auto;
+.preview-menu {
+  position: absolute;
+  top: 40px;
+  left: 5px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-#cropImage {
-    max-width: 100%;
-    max-height: 70vh;
-    display: block;
-    margin: 0 auto;
+.preview-menu.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-#manualCenteringCanvas {
-    border: 1px solid #000;
-    cursor: grab;
-    display: block;
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: 60vh;
+.preview-menu button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 16px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  box-shadow: none;
+  transition: background 0.2s, border-color 0.2s;
 }
-#manualCenteringModal button, #cropModal button, #pinModal button {
-    margin-left: 10px;
-    padding: 8px 16px;
-    cursor: pointer;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    transition: background 0.2s;
-}
-#manualCenteringModal button:hover, #cropModal button:hover, #pinModal button:hover {
-    background: #0056b3;
-}
-#manualCenteringModal button:last-child, #cropModal button:last-child, #pinModal button:last-child {
-    background: #6c757d; /* Grey for cancel */
-}
-#manualCenteringModal button:last-child:hover, #cropModal button:last-child:hover, #pinModal button:last-child:hover {
-    background: #5a6268;
-}
-
-.glass-header {
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 2rem;
-    margin: 3rem auto 2rem;
-    max-width: 900px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-}
-
-.glass-header h1 {
-    font-size: 2.4rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: #ffffffdd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.glass-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    align-items: center;
-}
-
-.glass-controls input[type="text"] {
-    padding: 12px 16px;
-    font-size: 16px;
-    border-radius: 12px;
-    border: none;
-    width: 200px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    outline: none;
-    transition: background 0.2s;
-}
-
-.glass-controls input[type="text"]::placeholder {
-    color: #ccc;
-}
-
-.glass-controls input[type="text"]:focus {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.glass-upload {
-    position: relative;
-    padding: 12px 20px;
-    font-size: 15px;
-    background: #20c997;
-    color: white;
-    font-weight: bold;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.glass-upload:hover {
-    background: #18b286;
-}
-
-.glass-upload input[type="file"] {
-    display: none;
-}
-
-.glass-controls button {
-    background: #ffc107;
-    color: #000;
-    border: none;
-    padding: 12px 20px;
-    font-size: 15px;
-    font-weight: bold;
-    border-radius: 12px;
-    transition: background 0.3s ease;
-    cursor: pointer;
-}
-
-.glass-controls button:hover {
-    background: #e6ac00;
-}
-
-#penModeModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    justify-content: center;
-    align-items: center;
-    z-index: 10001;
-}
-
-#penCanvasContainer {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    width: 800px;
-    height: 600px;
-    max-width: 90%;
-    max-height: 90%;
-    overflow: auto;
-}
-
-#penCanvas {
-    flex-grow: 1;
-    cursor: crosshair;
-    display: block;
-    background-color: #f0f0f0;
-    width: 100%;
-    height: 100%;
-}
-
-.pen-controls {
-    padding: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    border-top: 1px solid #eee;
-    background-color: #fff;
-}
-
-.pen-controls button {
-    padding: 8px 15px;
-    cursor: pointer;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    transition: background 0.2s;
-    font-weight: normal;
-}
-
-.pen-controls button:hover {
-    background: #0056b3;
-}
-
-.pen-controls button:last-child {
-    background: #6c757d;
-}
-
-.pen-controls button:last-child:hover {
-    background: #5a6268;
+.preview-menu button:hover {
+  background: #e0e0e0;
+  border-color: #ccc;
 }
 
 @media (max-width: 768px) {
-    .glass-header {
-        padding: 1.5rem;
-        margin: 2rem auto 1rem;
-    }
-    .glass-header h1 {
-        font-size: 1.8rem;
-    }
-    .glass-controls {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-    .glass-controls input[type="text"],
-    .glass-upload,
-    .glass-controls button {
-        width: 100%;
-        max-width: 300px;
-    }
-    .top-left-logo {
-        width: 120px;
-        top: 10px;
-        left: 10px;
-    }
-    #manualCenteringModal, #cropModal, #pinModal, #penCanvasContainer {
-        min-width: unset;
-        min-height: unset;
-        width: 95%;
-        height: 95%;
-    }
-    .pen-controls {
-        flex-direction: column;
-    }
+  .preview .toggle-individual {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+  }
+  .preview .menu-btn {
+    font-size: 18px;
+    line-height: 24px;
+  }
+  .preview-menu {
+    top: 35px;
+  }
+  .preview-menu button {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 14px;
+  }
 }
 
+#manualCenteringModal,
+#cropModal,
+#pinModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 9999;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  color: #333;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+#cropImage {
+  max-width: 100%;
+  max-height: 70vh;
+  display: block;
+  margin: 0 auto;
+}
+
+#manualCenteringCanvas {
+  border: 1px solid #000;
+  cursor: grab;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 60vh;
+}
+#manualCenteringModal button,
+#cropModal button,
+#pinModal button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+#manualCenteringModal button:hover,
+#cropModal button:hover,
+#pinModal button:hover {
+  background: #0056b3;
+}
+#manualCenteringModal button:last-child,
+#cropModal button:last-child,
+#pinModal button:last-child {
+  background: #6c757d; /* Grey for cancel */
+}
+#manualCenteringModal button:last-child:hover,
+#cropModal button:last-child:hover,
+#pinModal button:last-child:hover {
+  background: #5a6268;
+}
+
+.glass-header {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 3rem auto 2rem;
+  max-width: 900px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-header h1 {
+  font-size: 2.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #ffffffdd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.glass-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.glass-controls input[type="text"] {
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 12px;
+  border: none;
+  width: 200px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.glass-controls input[type="text"]::placeholder {
+  color: #ccc;
+}
+
+.glass-controls input[type="text"]:focus {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.glass-upload {
+  position: relative;
+  padding: 12px 20px;
+  font-size: 15px;
+  background: #20c997;
+  color: white;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.glass-upload:hover {
+  background: #18b286;
+}
+
+.glass-upload input[type="file"] {
+  display: none;
+}
+
+.glass-controls button {
+  background: #ffc107;
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+
+.glass-controls button:hover {
+  background: #e6ac00;
+}
+
+#penModeModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+}
+
+#penCanvasContainer {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+  height: 600px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+}
+
+#penCanvas {
+  flex-grow: 1;
+  cursor: crosshair;
+  display: block;
+  background-color: #f0f0f0;
+  width: 100%;
+  height: 100%;
+}
+
+.pen-controls {
+  padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid #eee;
+  background-color: #fff;
+}
+
+.pen-controls button {
+  padding: 8px 15px;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-weight: normal;
+}
+
+.pen-controls button:hover {
+  background: #0056b3;
+}
+
+.pen-controls button:last-child {
+  background: #6c757d;
+}
+
+.pen-controls button:last-child:hover {
+  background: #5a6268;
+}
+
+@media (max-width: 768px) {
+  .glass-header {
+    padding: 1.5rem;
+    margin: 2rem auto 1rem;
+  }
+  .glass-header h1 {
+    font-size: 1.8rem;
+  }
+  .glass-controls {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .glass-controls input[type="text"],
+  .glass-upload,
+  .glass-controls button {
+    width: 100%;
+    max-width: 300px;
+  }
+  .top-left-logo {
+    width: 120px;
+    top: 10px;
+    left: 10px;
+  }
+  #manualCenteringModal,
+  #cropModal,
+  #pinModal,
+  #penCanvasContainer {
+    min-width: unset;
+    min-height: unset;
+    width: 95%;
+    height: 95%;
+  }
+  .pen-controls {
+    flex-direction: column;
+  }
+}

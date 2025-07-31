@@ -1,81 +1,84 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Купуйте побутову техніку, телевізори, гаджети та електроніку для дому в інтернет-магазині Nowe. Зручний пошук, швидке оформлення замовлення та доставка по Україні.">
-    <meta name="keywords" content="техніка для кухні, техніка для дому, телевізори та мультимедіа, смарт-годинники та гаджети, краса і здоровʼя">
-    <meta name="author" content="nowe">
-    <meta name="robots" content="index, follow">
-    <title>Маштабування фото — Nowe</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Купуйте побутову техніку, телевізори, гаджети та електроніку для дому в інтернет-магазині Nowe. Зручний пошук, швидке оформлення замовлення та доставка по Україні.">
+  <meta name="keywords" content="техніка для кухні, техніка для дому, телевізори та мультимедіа, смарт-годинники та гаджети, краса і здоровʼя">
+  <meta name="author" content="nowe">
+  <meta name="robots" content="index, follow">
+  <title>Маштабування фото — Nowe</title>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
-    <div class="glass-header">
-        <h1><span>🖼️</span> Масова обробка фото</h1>
-        <div class="glass-controls">
-            <label class="glass-upload">
-                <input type="file" id="imageInput" multiple accept="image/*">
-                📁 Завантажити фото
-            </label>
-            
-            <input type="text" id="codeInput" placeholder="Префікс (код)">
-            
-            <button id="togglePaddingBtn">🔳 Вимкнути відступи</button>
-            <button id="clearAllBtn">🗑️ Очистити всі фото</button>
-            <button id="processBtn">📦 Скачати ZIP</button>
-        </div>
-    </div>
-    <div class="preview-container" id="previewContainer"></div>
+  <img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
+  <div class="glass-header">
+    <h1><span>🖼️</span> Масова обробка фото</h1>
+    <div class="glass-controls">
+      <label class="glass-upload">
+        <input type="file" id="imageInput" multiple accept="image/*">
+        📁 Завантажити фото
+      </label>
 
-    <div id="cropModal">
-        <img id="cropImage" src="" alt="Обрізання" />
-        <div style="margin-top:10px; text-align:right;">
-            <button id="saveCropBtn">Зберегти обрізку</button>
-            <button onclick="closeCropModal()">Скасувати</button>
-        </div>
-    </div>
+      <input type="text" id="codeInput" placeholder="Префікс (код)">
 
-    <div id="manualCenteringModal">
-        <canvas id="manualCenteringCanvas" width="400" height="400"></canvas>
-        <div style="margin-top:10px; text-align:right;">
-            <button id="manualCenteringSaveBtn">Зберегти</button>
-            <button id="manualCenteringCancelBtn">Скасувати</button>
-        </div>
+      <button id="togglePaddingBtn">🔳 Вимкнути відступи</button>
+      <button id="clearAllBtn">🗑️ Очистити всі фото</button>
+      <button id="processBtn">📦 Скачати ZIP</button>
     </div>
+  </div>
+  <div class="preview-container" id="previewContainer"></div>
 
-    <div id="pinModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; justify-content:center; align-items:center; z-index:10000;">
-        <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
-            <p>Введіть PIN-код для видалення фону</p>
-            <input type="password" id="pinInput" maxlength="4" style="font-size: 20px; padding: 5px 10px; width: 100px; text-align: center;" />
-            <div style="margin-top:10px;">
-                <button id="pinSubmitBtn">OK</button>
-                <button id="pinCancelBtn">Скасувати</button>
-            </div>
-        </div>
+  <div id="cropModal">
+    <img id="cropImage" src="" alt="Обрізання" />
+    <div style="margin-top:10px; text-align:right;">
+      <button id="saveCropBtn">Зберегти обрізку</button>
+      <button onclick="closeCropModal()">Скасувати</button>
     </div>
+  </div>
 
-    <div id="penModeModal">
-        <div id="penCanvasContainer">
-            <canvas id="penCanvas"></canvas>
-            <div class="pen-controls">
-              <button id="undoPenBtn">⬅️ Відмінити крок</button>
-                <button id="clearPenBtn">Очистити обведення</button>
-                <button id="savePenBtn">Зберегти обведення</button>
-                <button id="cancelPenBtn">Скасувати / Закрити</button>
-            </div>
-        </div>
+  <div id="manualCenteringModal">
+    <canvas id="manualCenteringCanvas" width="400" height="400"></canvas>
+    <div style="margin-top:10px; text-align:right;">
+      <button id="manualCenteringSaveBtn">Зберегти</button>
+      <button id="manualCenteringCancelBtn">Скасувати</button>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
-    <script src="script.js"></script>
+  <div id="pinModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#00000080; justify-content:center; align-items:center; z-index:10000;">
+    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
+      <p>Введіть PIN-код для видалення фону</p>
+      <input type="password" id="pinInput" maxlength="4" style="font-size: 20px; padding: 5px 10px; width: 100px; text-align: center;" />
+      <div style="margin-top:10px;">
+        <button id="pinSubmitBtn">OK</button>
+        <button id="pinCancelBtn">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="penModeModal">
+    <div id="penCanvasContainer">
+      <canvas id="penCanvas"></canvas>
+      <div class="pen-controls">
+        <button id="undoPenBtn">⬅️ Відмінити крок</button>
+        <button id="clearPenBtn">Очистити обведення</button>
+        <button id="savePenBtn">Зберегти обведення</button>
+        <button id="cancelPenBtn">Скасувати / Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>
