@@ -54,6 +54,7 @@
   </div>
 
   <div id="pinModal">
+    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
       <p>Введіть PIN-код для видалення фону</p>
       <input type="password" id="pinInput" maxlength="4" style="font-size: 20px; padding: 5px 10px; width: 100px; text-align: center;" />
       <div style="margin-top:10px;">
@@ -73,6 +74,18 @@
         <button id="cancelPenBtn">Скасувати / Закрити</button>
       </div>
     </div>
+  </div>
+
+  <div id="transformModal">
+        <img id="transformImage" src="" alt="Трансформація" />
+        <div style="margin-top:10px; text-align:right;">
+            <button id="rotateLeftBtn">⟲ Поворот вліво</button>
+            <button id="rotateRightBtn">⟳ Поворот вправо</button>
+            <button id="flipXBtn">↔ Віддзеркалити по горизонталі</button>
+            <button id="flipYBtn">↕ Віддзеркалити по вертикалі</button>
+            <button id="saveTransformBtn">Зберегти</button>
+            <button onclick="closeTransformModal()">Скасувати</button>
+          </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>

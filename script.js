@@ -66,6 +66,124 @@ const pointHitRadius = 15;
 
 let hasDragged = false;
 
+const transformModal = document.getElementById("transformModal");
+const transformImage = document.getElementById("transformImage");
+const rotateLeftBtn = document.getElementById("rotateLeftBtn");
+const rotateRightBtn = document.getElementById("rotateRightBtn");
+const flipXBtn = document.getElementById("flipXBtn");
+const flipYBtn = document.getElementById("flipYBtn");
+const saveTransformBtn = document.getElementById("saveTransformBtn");
+
+let currentTransformObj = null;
+
+function openTransformModal(obj) {
+  currentTransformObj = obj;
+  const source = obj.file;
+  const reader = new FileReader();
+  reader.onload = () => {
+    transformImage.src = reader.result;
+    transformModal.style.display = "block";
+    applyTransformState(obj.transformState);
+  };
+  reader.readAsDataURL(source);
+}
+
+function closeTransformModal() {
+  transformModal.style.display = "none";
+  currentTransformObj = null;
+}
+
+function applyTransformState(state) {
+  let transformString = "";
+  if (state.rotation !== 0) {
+    transformString += `rotate(${state.rotation}deg) `;
+  }
+  if (state.flipX) {
+    transformString += `scaleX(-1) `;
+  }
+  if (state.flipY) {
+    transformString += `scaleY(-1) `;
+  }
+  transformImage.style.transform = transformString;
+}
+
+rotateLeftBtn.addEventListener("click", () => {
+  if (!currentTransformObj) return;
+  const state = currentTransformObj.transformState;
+  state.rotation = (state.rotation - 90 + 360) % 360;
+  applyTransformState(state);
+});
+
+rotateRightBtn.addEventListener("click", () => {
+  if (!currentTransformObj) return;
+  const state = currentTransformObj.transformState;
+  state.rotation = (state.rotation + 90) % 360;
+  applyTransformState(state);
+});
+
+flipXBtn.addEventListener("click", () => {
+  if (!currentTransformObj) return;
+  const state = currentTransformObj.transformState;
+  state.flipX = !state.flipX;
+  applyTransformState(state);
+});
+
+flipYBtn.addEventListener("click", () => {
+  if (!currentTransformObj) return;
+  const state = currentTransformObj.transformState;
+  state.flipY = !state.flipY;
+  applyTransformState(state);
+});
+
+saveTransformBtn.addEventListener("click", () => {
+  if (!currentTransformObj) return;
+
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  const img = new Image();
+  img.onload = () => {
+    const isRotated = currentTransformObj.transformState.rotation % 180 !== 0;
+    tempCanvas.width = isRotated ? img.height : img.width;
+    tempCanvas.height = isRotated ? img.width : img.height;
+
+    tempCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+    tempCtx.rotate(
+      (currentTransformObj.transformState.rotation * Math.PI) / 180
+    );
+
+    let scaleX = currentTransformObj.transformState.flipX ? -1 : 1;
+    let scaleY = currentTransformObj.transformState.flipY ? -1 : 1;
+    tempCtx.scale(scaleX, scaleY);
+
+    tempCtx.drawImage(img, -img.width / 2, -img.height / 2);
+
+    tempCanvas.toBlob((blob) => {
+      if (blob) {
+        currentTransformObj.file = new File(
+          [blob],
+          currentTransformObj.file.name,
+          {
+            type: "image/png"
+          }
+        );
+        currentTransformObj.croppedBlob = null;
+        currentTransformObj.removeBgBlob = null;
+        currentTransformObj.penCroppedBlob = null;
+        currentTransformObj.manualOffset = { x: 0, y: 0 };
+        currentTransformObj.transformState = {
+          rotation: 0,
+          flipX: false,
+          flipY: false
+        };
+
+        updatePreview(currentTransformObj);
+        closeTransformModal();
+      }
+    }, "image/png");
+  };
+  img.src = URL.createObjectURL(currentTransformObj.file);
+});
+
 togglePaddingBtn.addEventListener("click", () => {
   withPadding = !withPadding;
   togglePaddingBtn.textContent = withPadding
@@ -85,7 +203,12 @@ imageInput.addEventListener("change", () => {
       removeBgBlob: null,
       croppedBlob: null,
       manualOffset: { x: 0, y: 0 },
-      penCroppedBlob: null
+      penCroppedBlob: null,
+      transformState: {
+        rotation: 0,
+        flipX: false,
+        flipY: false
+      }
     };
     previewImages.push(obj);
   });
@@ -256,6 +379,16 @@ function createPreview(obj) {
     previewMenu.classList.remove("active");
   });
   previewMenu.appendChild(manualCenterBtn);
+
+  const transformBtn = document.createElement("button");
+  transformBtn.textContent = "🔄";
+  transformBtn.title = "Поворот / Віддзеркалення";
+  transformBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openTransformModal(obj);
+    previewMenu.classList.remove("active");
+  });
+  previewMenu.appendChild(transformBtn);
 
   menuBtn.addEventListener("click", (e) => {
     e.stopPropagation();

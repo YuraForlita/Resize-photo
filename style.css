@@ -109,7 +109,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  z-index: 1;
+  z-index: 10;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -418,4 +418,53 @@ body {
   .pen-controls {
     flex-direction: column;
   }
+}
+
+#transformModal {
+  display: none; /* Це ключовий рядок. За замовчуванням модальне вікно приховане. */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 9999;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  color: #333;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+#transformImage {
+  max-width: 100%;
+  max-height: 70vh;
+  display: block;
+  margin: 0 auto;
+  transition: transform 0.3s ease; /* Додаємо плавний перехід */
+}
+
+#transformModal button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+#transformModal button:hover {
+  background: #0056b3;
+}
+
+#transformModal button:last-child {
+  background: #6c757d;
+}
+
+#transformModal button:last-child:hover {
+  background: #5a6268;
 }
