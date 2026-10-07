@@ -8,88 +8,316 @@
   <meta name="keywords" content="фото, конвертатор, nowe, обробка, ai, ші">
   <meta name="author" content="nowe">
   <meta name="robots" content="index, follow">
-  <title>Маштабування фото — Nowe</title>
+  <meta name="color-scheme" content="dark light">
+  <title>Масштабування фото — Nowe</title>
 
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+  <link rel="icon" type="image/png" href="nowe.com.ua logo robi (1).png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
+  <script>
+    try {
+      const t = localStorage.getItem("theme");
+      if (t) document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 
 <body>
-  <img src="nowe.com.ua logo robi (1).png" alt="Логотип" class="top-left-logo">
-  <div class="glass-header">
-    <h1><span>🖼️</span> Масова обробка фото</h1>
-    <div class="glass-controls">
-      <label class="glass-upload">
-        <input type="file" id="imageInput" multiple accept="image/*">
-        📁 Завантажити фото
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="nowe.com.ua logo robi (1).png" alt="Nowe" class="brand-logo">
+        <div class="brand-text">
+          <strong>Обробка фото</strong>
+          <span>JPG 1200×1200 · білий фон</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn ghost" id="helpBtn" data-tip="Підказки та гарячі клавіші" aria-label="Підказки"><span data-icon="keyboard"></span></button>
+        <button class="icon-btn ghost" id="themeBtn" data-tip="Світла / темна тема" aria-label="Тема"><span data-icon="sun"></span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar-wrap">
+    <section class="toolbar" aria-label="Налаштування експорту">
+      <div class="field">
+        <label for="codeInput">Код товару (префікс)</label>
+        <div class="input-wrap">
+          <span data-icon="hash" class="input-icon"></span>
+          <input type="text" id="codeInput" placeholder="наприклад, 10245" autocomplete="off" spellcheck="false">
+        </div>
+        <small class="field-hint">Файли: <code id="namePreview">image_1.jpg</code></small>
+      </div>
+
+      <label class="switch-row" data-tip="Відступ 50px від країв для всіх фото">
+        <input type="checkbox" id="paddingSwitch" checked>
+        <span class="switch"></span>
+        <span class="switch-label">
+          Відступи
+          <small id="paddingState">усі з відступом</small>
+        </span>
       </label>
 
-      <input type="text" id="codeInput" placeholder="Префікс (код)">
+      <div class="toolbar-spacer"></div>
 
-      <button id="togglePaddingBtn">🔳 Вимкнути відступи</button>
-      <button id="clearAllBtn">🗑️ Очистити всі фото</button>
-      <button id="processBtn">📦 Скачати ZIP</button>
-    </div>
-  </div>
-  <div class="preview-container" id="previewContainer"></div>
-
-  <div id="cropModal">
-    <img id="cropImage" src="" alt="Обрізання" />
-    <div style="margin-top:10px; text-align:right;">
-      <button id="saveCropBtn">Зберегти обрізку</button>
-      <button onclick="closeCropModal()">Скасувати</button>
-    </div>
-  </div>
-
-  <div id="manualCenteringModal">
-    <canvas id="manualCenteringCanvas" width="400" height="400"></canvas>
-    <div style="margin-top:10px; text-align:right;">
-      <button id="manualCenteringSaveBtn">Зберегти</button>
-      <button id="manualCenteringCancelBtn">Скасувати</button>
-    </div>
+      <div class="toolbar-buttons">
+        <label class="btn secondary" for="imageInput">
+          <span data-icon="image-plus"></span><span>Додати фото</span>
+        </label>
+        <input type="file" id="imageInput" multiple accept="image/*" hidden>
+        <button class="btn ghost danger-text" id="clearAllBtn" disabled>
+          <span data-icon="trash-2"></span><span>Очистити</span>
+        </button>
+        <button class="btn primary" id="processBtn" disabled>
+          <span data-icon="file-archive"></span><span class="btn-text">Скачати ZIP</span>
+          <span class="count-pill" id="countPill">0</span>
+        </button>
+      </div>
+      <div class="progress" id="zipProgress" hidden><div class="progress-bar"></div></div>
+    </section>
   </div>
 
-  <div id="pinModal">
-    <div style="background:#fff; padding:20px; border-radius:10px; text-align:center;">
-      <p>Введіть PIN-код для видалення фону</p>
-      <input type="password" id="pinInput" maxlength="4" style="font-size: 20px; padding: 5px 10px; width: 100px; text-align: center;" />
-      <div style="margin-top:10px;">
-        <button id="pinSubmitBtn">OK</button>
-        <button id="pinCancelBtn">Скасувати</button>
+  <main class="main">
+    <label class="dropzone" id="dropzone" for="imageInput">
+      <div class="dropzone-icon"><span data-icon="images"></span></div>
+      <h2>Перетягніть фото сюди</h2>
+      <p>або натисніть, щоб вибрати файли. Також можна вставити з буфера <kbd>Ctrl</kbd>+<kbd>V</kbd></p>
+      <div class="dropzone-specs">
+        <span><span data-icon="scan"></span>1200×1200 px</span>
+        <span><span data-icon="square-dashed"></span>відступ 50 px</span>
+        <span><span data-icon="file-archive"></span>ZIP з JPG</span>
+      </div>
+    </label>
+
+    <section class="grid" id="previewContainer" aria-label="Фото"></section>
+  </main>
+
+  <div class="drop-overlay" id="dropOverlay">
+    <div class="drop-overlay-inner">
+      <span data-icon="upload"></span>
+      <strong>Відпустіть, щоб додати фото</strong>
+    </div>
+  </div>
+
+  <!-- Обрізка -->
+  <dialog class="modal modal-lg" id="cropModal">
+    <div class="modal-head">
+      <h3><span data-icon="crop"></span>Обрізка</h3>
+      <button class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body crop-body">
+      <img id="cropImage" src="" alt="Обрізання">
+    </div>
+    <div class="modal-foot">
+      <div class="chips" id="cropRatios">
+        <button class="chip active" data-ratio="NaN">Вільно</button>
+        <button class="chip" data-ratio="1">1:1</button>
+        <button class="chip" data-ratio="1.3333">4:3</button>
+        <button class="chip" data-ratio="0.75">3:4</button>
+        <button class="chip" data-ratio="1.7778">16:9</button>
+      </div>
+      <span class="crop-info" id="cropInfo"></span>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Скасувати</button>
+        <button class="btn primary" id="saveCropBtn" autofocus><span data-icon="check"></span>Зберегти обрізку</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <div id="penModeModal">
-    <div id="penCanvasContainer">
+  <!-- Поворот / віддзеркалення -->
+  <dialog class="modal" id="transformModal">
+    <div class="modal-head">
+      <h3><span data-icon="rotate-cw"></span>Поворот і віддзеркалення</h3>
+      <button class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body center-body">
+      <canvas id="transformCanvas" class="checker"></canvas>
+    </div>
+    <div class="modal-foot">
+      <div class="btn-group">
+        <button class="btn secondary" id="rotateLeftBtn" data-tip="Поворот вліво"><span data-icon="rotate-ccw"></span><span class="hide-sm">Вліво</span></button>
+        <button class="btn secondary" id="rotateRightBtn" data-tip="Поворот вправо"><span data-icon="rotate-cw"></span><span class="hide-sm">Вправо</span></button>
+        <button class="btn secondary" id="flipXBtn" data-tip="Віддзеркалити по горизонталі"><span data-icon="flip-horizontal-2"></span></button>
+        <button class="btn secondary" id="flipYBtn" data-tip="Віддзеркалити по вертикалі"><span data-icon="flip-vertical-2"></span></button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Скасувати</button>
+        <button class="btn primary" id="saveTransformBtn"><span data-icon="check"></span>Зберегти</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Ручне центрування -->
+  <dialog class="modal" id="manualCenteringModal">
+    <div class="modal-head">
+      <h3><span data-icon="move"></span>Ручне центрування</h3>
+      <button class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body center-body">
+      <canvas id="manualCenteringCanvas" tabindex="0"></canvas>
+      <p class="muted small">Перетягніть фото. Стрілки зсувають на 1 px, із <kbd>Shift</kbd> на 10 px. Біля центру фото «прилипає».</p>
+    </div>
+    <div class="modal-foot">
+      <div class="btn-group">
+        <button class="btn secondary" id="centerResetBtn"><span data-icon="crosshair"></span>По центру</button>
+        <label class="switch-row compact">
+          <input type="checkbox" id="centerPaddingSwitch">
+          <span class="switch"></span>
+          <span class="switch-label">Відступ</span>
+        </label>
+        <span class="offset-readout" id="offsetReadout">X 0 · Y 0</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="manualCenteringCancelBtn">Скасувати</button>
+        <button class="btn primary" id="manualCenteringSaveBtn"><span data-icon="check"></span>Зберегти</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- PIN для видалення фону -->
+  <dialog class="modal modal-sm" id="pinModal">
+    <form method="dialog" id="pinForm">
+      <div class="modal-head">
+        <h3><span data-icon="lock"></span>Видалення фону</h3>
+        <button type="button" class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+      </div>
+      <div class="modal-body">
+        <p class="muted">Введіть PIN-код для видалення фону</p>
+        <input type="password" id="pinInput" class="pin-input" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="••••">
+        <p class="error-text" id="pinError" hidden>Невірний PIN-код</p>
+        <label class="check-row">
+          <input type="checkbox" id="bgTrimCheck" checked>
+          <span>Обрізати порожні краї навколо об'єкта</span>
+        </label>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="pinCancelBtn">Скасувати</button>
+          <button type="submit" class="btn primary" id="pinSubmitBtn"><span data-icon="wand-sparkles"></span>Видалити фон</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Перо -->
+  <dialog class="modal modal-full" id="penModeModal">
+    <div class="modal-head">
+      <h3><span data-icon="pen-tool"></span>Перо: обведіть об'єкт</h3>
+      <div class="pen-tools">
+        <button class="icon-btn" id="undoPenBtn" data-tip="Відмінити крок (Ctrl+Z)"><span data-icon="undo-2"></span></button>
+        <button class="icon-btn" id="clearPenBtn" data-tip="Очистити обведення"><span data-icon="trash-2"></span></button>
+        <button class="icon-btn" id="closePathBtn" data-tip="Замкнути контур (Enter)"><span data-icon="spline"></span></button>
+        <span class="divider"></span>
+        <button class="icon-btn" id="panModeBtn" data-tip="Переміщення полотна (затисніть Пробіл)"><span data-icon="hand"></span></button>
+        <button class="icon-btn" id="zoomOutBtn" data-tip="Зменшити (−)"><span data-icon="zoom-out"></span></button>
+        <button class="zoom-readout" id="zoomFitBtn" data-tip="Вмістити (0)">100%</button>
+        <button class="icon-btn" id="zoomInBtn" data-tip="Збільшити (+)"><span data-icon="zoom-in"></span></button>
+      </div>
+      <button class="icon-btn ghost" id="cancelPenX" aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="pen-stage" id="penStage">
       <canvas id="penCanvas"></canvas>
-      <div class="pen-controls">
-        <button id="undoPenBtn">⬅️ Відмінити крок</button>
-        <button id="clearPenBtn">Очистити обведення</button>
-        <button id="savePenBtn">Зберегти обведення</button>
-        <button id="cancelPenBtn">Скасувати / Закрити</button>
+      <div class="pen-hint" id="penHint">Клікайте, щоб ставити точки. Щоб замкнути контур, клікніть на першу точку.</div>
+    </div>
+    <div class="modal-foot">
+      <div class="pen-help muted small">
+        <span><b>Колесо</b> масштаб</span>
+        <span><b>ПКМ / Пробіл</b> рух полотна</span>
+        <span><b>Тягнути точку</b> змінити</span>
+        <span><b>Shift+клік</b> видалити точку</span>
+      </div>
+      <div class="modal-actions">
+        <label class="check-row inline">
+          <input type="checkbox" id="penTrimCheck" checked>
+          <span>Обрізати по контуру</span>
+        </label>
+        <button class="btn ghost" id="cancelPenBtn">Скасувати</button>
+        <button class="btn primary" id="savePenBtn"><span data-icon="check"></span>Зберегти обведення</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <div id="transformModal">
-    <img id="transformImage" src="" alt="Трансформація" />
-    <div style="margin-top:10px; text-align:right;">
-     <button id="rotateLeftBtn">⟲ Поворот вліво</button>
-     <button id="rotateRightBtn">⟳ Поворот вправо</button>
-     <button id="flipXBtn">↔ Віддзеркалити по горизонталі</button>
-     <button id="flipYBtn">↕ Віддзеркалити по вертикалі</button>
-     <button id="saveTransformBtn">Зберегти</button>
-     <button onclick="closeTransformModal()">Скасувати</button>
-     </div>
-  </div>
+  <!-- Перегляд результату -->
+  <dialog class="modal modal-lg" id="lightbox">
+    <div class="modal-head">
+      <h3 id="lightboxTitle">image_1.jpg</h3>
+      <span class="muted small" id="lightboxMeta"></span>
+      <button class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body lightbox-body">
+      <button class="icon-btn nav-btn prev" id="lbPrev" aria-label="Попереднє"><span data-icon="chevron-left"></span></button>
+      <canvas id="lightboxCanvas" width="1200" height="1200"></canvas>
+      <button class="icon-btn nav-btn next" id="lbNext" aria-label="Наступне"><span data-icon="chevron-right"></span></button>
+    </div>
+    <div class="modal-foot">
+      <span class="muted small">Так фото виглядатиме у ZIP-архіві</span>
+      <div class="modal-actions">
+        <button class="btn secondary" id="lbDownload"><span data-icon="download"></span>Скачати JPG</button>
+      </div>
+    </div>
+  </dialog>
 
+  <!-- Підтвердження -->
+  <dialog class="modal modal-sm" id="confirmModal">
+    <div class="modal-head">
+      <h3 id="confirmTitle">Підтвердження</h3>
+    </div>
+    <div class="modal-body">
+      <p id="confirmText" class="muted"></p>
+    </div>
+    <div class="modal-foot">
+      <div class="modal-actions">
+        <button class="btn ghost" id="confirmCancel">Скасувати</button>
+        <button class="btn danger" id="confirmOk">Так</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Довідка -->
+  <dialog class="modal" id="helpModal">
+    <div class="modal-head">
+      <h3><span data-icon="keyboard"></span>Як користуватись</h3>
+      <button class="icon-btn ghost" data-close aria-label="Закрити"><span data-icon="x"></span></button>
+    </div>
+    <div class="modal-body help-body">
+      <ol>
+        <li>Додайте фото: кнопкою, перетягуванням у вікно або через <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+        <li>Введіть код товару. Файли отримають назви <code>код_1.jpg</code>, <code>код_2.jpg</code>…</li>
+        <li>Змініть порядок, перетягуючи картки. Номер на картці відповідає номеру файлу.</li>
+        <li>Редагуйте фото кнопками під прев'ю. Кожну дію можна відмінити <span data-icon="undo-2" class="inline-icon"></span>, а <span data-icon="rotate-ccw-square" class="inline-icon"></span> повертає оригінал.</li>
+        <li>Натисніть на прев'ю, щоб побачити результат у повному розмірі.</li>
+        <li>«Скачати ZIP» збирає всі фото у JPG 1200×1200 на білому фоні.</li>
+      </ol>
+      <h4>Інструменти</h4>
+      <ul class="tool-list">
+        <li><span data-icon="crop"></span><b>Обрізка</b>: вільна або з пропорціями</li>
+        <li><span data-icon="rotate-cw"></span><b>Поворот</b>: на 90° і віддзеркалення</li>
+        <li><span data-icon="move"></span><b>Центрування</b>: ручний зсув фото в кадрі</li>
+        <li><span data-icon="pen-tool"></span><b>Перо</b>: обвести об'єкт і прибрати все навколо</li>
+        <li><span data-icon="wand-sparkles"></span><b>Фон</b>: автоматичне видалення через remove.bg (PIN)</li>
+        <li><span data-icon="square-dashed"></span><b>Відступ</b>: 50 px від країв або на весь кадр</li>
+      </ul>
+      <h4>Перо</h4>
+      <ul class="kbd-list">
+        <li><span>Масштаб</span><span>колесо миші, <kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></span></li>
+        <li><span>Рух полотна</span><span>права кнопка, <kbd>Пробіл</kbd>, два пальці</span></li>
+        <li><span>Відмінити крок</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd></span></li>
+        <li><span>Замкнути контур</span><span><kbd>Enter</kbd> або клік на першу точку</span></li>
+        <li><span>Видалити точку</span><span><kbd>Shift</kbd>+клік</span></li>
+      </ul>
+    </div>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
 </body>
 
